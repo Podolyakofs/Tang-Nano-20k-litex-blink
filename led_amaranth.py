@@ -26,7 +26,6 @@ class LEDBlinker(Elaboratable):
 
 from amaranth.back import verilog
 
-
 led_amaranth = LEDBlinker()
 with open("led_amaranth.v", "w") as f:
     f.write(verilog.convert(led_amaranth, ports=[led_amaranth.led]))

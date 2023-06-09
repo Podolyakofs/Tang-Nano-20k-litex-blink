@@ -4,7 +4,8 @@
 - 2 led - через сгенерированный verilog через [amaranth-hdl](https://github.com/amaranth-lang/amaranth)
 - 3 led - управляется через CSRStorage регистр (регулируется заполнение)
 - 4 led - через кнопку и CSRStatus регистр
-- 5&6 led - через CSRStorage регистр
+- 5 led - через SystemVerilog
+- 6 led - через CSRStorage регистр
 
 
 Сборка командой 

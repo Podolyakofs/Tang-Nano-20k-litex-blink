@@ -9,7 +9,7 @@ import os
 
 from litex.build.generic_platform import GenericPlatform
 from litex.build.gowin import common
-import mygowin as gowin
+import mygowin as gowin #Change for sv support
 
 # GowinPlatform ------------------------------------------------------------------------------------
 

@@ -118,7 +118,7 @@ class GowinToolchain(GenericToolchain):
         # Set Options.
         for opt, val in self.options.items():
             tcl.append(f"set_option -{opt} {val}")
-        tcl.append('set_option -verilog_std sysv2017')
+        tcl.append('set_option -verilog_std sysv2017') #Change for sv support
         # Run.
         tcl.append("run all")
 

@@ -12,6 +12,7 @@ Leds:
 - 6 led - from CSRStorage reg (led)
 
 Main file - my_stn_20k_main_litex.py
+
 Added some changes (myplatform, mygowin) for litex/build/gowin/gowin.py to change default Verilog 2001 to System Verilog 2017 option in GowinSynthesis (gw_sh)
 
 Add uartbone to demonstrate how to add and use CSR registers

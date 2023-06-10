@@ -11,13 +11,13 @@ Leds:
 - 5 led - from led.sv SystemVerilog
 - 6 led - from CSRStorage reg (led)
 
-- WS2812 led blinked via Wisnbone master and FSM
+- WS2812 led blinked via Wishbone master and FSM
 
 Main file - my_stn_20k_main_litex.py
 
 Added some changes (myplatform, mygowin) for litex/build/gowin/gowin.py to change default Verilog 2001 to System Verilog 2017 option in GowinSynthesis (gw_sh)
 
-Add uartbone to demonstrate how to add and use CSR registers
+Added uartbone to demonstrate how to add and use CSR registers
 
 Deps: Litex, Amaranth, Gowin ide/programmer (education version)
 

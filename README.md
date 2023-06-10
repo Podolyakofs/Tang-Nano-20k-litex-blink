@@ -25,7 +25,7 @@ python3 amaranth_led.py
 python3 ./my_stn_20k_main_litex.py  --build --load --cpu-type None --csr-csv "csr.csv" --no-uart
 ```
  
-Than we can connect with litex_server и litex_cli:
+Than we can connect with litex_server and litex_cli:
 ```
 litex_server --uart --uart-port=/dev/ttyUSB1
 litex_cli --gui

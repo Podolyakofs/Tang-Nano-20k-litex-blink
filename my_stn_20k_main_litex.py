@@ -21,6 +21,7 @@ from litex.soc.integration.builder import *
 from litex.soc.cores.gpio import GPIOIn
 from litex.soc.cores.led import LedChaser, WS2812
 from litex.soc.interconnect.csr import *
+from litex.soc.interconnect.wishbone import Interface
 
 from litedram.modules import M12L64322A  # FIXME: use the real model number
 from litedram.phy import GENSDRPHY
@@ -55,9 +56,8 @@ class _CRG(LiteXModule):
 
 class BaseSoC(SoCCore):
     def __init__(self, sys_clk_freq=48e6,
-        with_led_chaser     = False, #change defaut chaser to custom
-        with_rgb_led        = False,
-        with_buttons        = True,
+        with_led_chaser     = False, #change defaut to custom
+        with_rgb_led        = True,
         **kwargs):
 
         platform = sipeed_tang_nano_20k.Platform(toolchain="gowin")
@@ -112,6 +112,69 @@ class BaseSoC(SoCCore):
                 origin = 0x2000_0000,
                 size   = 4,
             ))
+
+
+        class WBMasterWrite(Module,AutoCSR):
+            def __init__(self, data_width=32):
+                # Create a Wishbone master interface
+                self.ws2812 = CSRStorage(32,description="WS2812 CSR") 
+                self.csr_counter = CSRStorage(24,description="counter") 
+                self.wb_master = Interface(data_width=data_width)
+                self.counter = Signal(24)
+                self.data=Signal(24)
+                         
+              # Create a state machine for writing
+                self.submodules.fsm = fsm = FSM(reset_state="WRITE")
+                fsm.act("WRITE", 
+                    # Set the address, data, select, and write enable signals
+                    self.wb_master.adr.eq(0x2000_0000 >> 2), #Byte to Word conversion
+                    # The DDR_BASE_ADDRESS is the base address of the DDR memory in bytes, 
+                    # so it needs to be shifted right by 2 bits to convert it to words. 
+                    # For example, if the DDR_BASE_ADDRESS is 0x40000000, 
+                    # then the wishbone bus address is 0x10000000.
+                    self.wb_master.dat_w.eq(self.data),
+                    self.wb_master.sel.eq(0xf),
+                    self.wb_master.we.eq(1),
+                    # Assert cyc and stb signals
+                    self.wb_master.cyc.eq(1),
+                    self.wb_master.stb.eq(1),     
+                    
+                    # Go to WAIT state
+                    NextState("WAIT")
+                )
+                fsm.act("WAIT",
+                    # Wait for the ack signal from the slave
+                    If  (self.wb_master.ack,
+                        # Deassert cyc and stb signals
+                        self.wb_master.cyc.eq(0),
+                        self.wb_master.stb.eq(0),
+                      ),
+
+                    NextValue(self.counter, self.counter + 1),
+                    NextValue(self.csr_counter.storage, self.counter + 1),
+                    If (self.counter[23] == 1, #Color change speed
+                            NextValue(self.counter, 0),
+                            #Change color
+                            If(self.data==0,NextValue(self.data,0xff)).Else(
+                            NextValue(self.data,self.data << 2)),
+                            NextState("READ")
+                        )
+                    )
+                fsm.act("READ",
+                        self.wb_master.stb.eq(1),
+                        self.wb_master.cyc.eq(1),
+                        self.wb_master.we.eq(0),
+                        self.wb_master.sel.eq(0xf),
+                        self.wb_master.adr.eq(0x2000_0000 >> 2),
+                        If(self.wb_master.ack,
+                                NextValue(self.ws2812.storage, self.wb_master.dat_r),
+                                NextState("WRITE"),
+                        )
+                    )
+        wb = WBMasterWrite()
+        self.submodules.wbm = wb
+        self.bus.add_master(name="ws2812 master",master = self.wbm.wb_master)
+
        
         # Leds -------------------------------------------------------------------------------------
         if with_led_chaser: #we don't use it

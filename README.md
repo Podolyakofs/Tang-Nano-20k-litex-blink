@@ -11,6 +11,8 @@ Leds:
 - 5 led - from led.sv SystemVerilog
 - 6 led - from CSRStorage reg (led)
 
+- WS2812 led blinked via Wisnbone master and FSM
+
 Main file - my_stn_20k_main_litex.py
 
 Added some changes (myplatform, mygowin) for litex/build/gowin/gowin.py to change default Verilog 2001 to System Verilog 2017 option in GowinSynthesis (gw_sh)
@@ -31,3 +33,8 @@ litex_server --uart --uart-port=/dev/ttyUSB1
 litex_cli --gui
 ```
 Try change values for led(0x1) and pwm(0xfffff)
+
+Also we can use wishbone-tool for WS2812
+```
+wishbone-tool --serial /dev/ttyUSB1 0x20000000 0xffffff  
+```
